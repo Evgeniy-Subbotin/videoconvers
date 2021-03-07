@@ -37,7 +37,7 @@ navigator.mediaDevices.getUserMedia({
         }
     });
     socket.on("createMessage", message => {
-        $('ul').append(`<li class="message"><b>user</b><br/>${message}</li>`);
+        $('ul').append(`<li class="messages__container"><span>User</span><p>${message}</p></li>`);
         scrollToBottom();
     });
 });
@@ -73,13 +73,13 @@ function addVideoStream(video, stream) {
 
 
 const scrollToBottom = () => {
-    var d = $('.main__chat_window');
+    var d = $('.conference__chat_window');
     d.scrollTop(d.prop('scrollHeight'));
 }
 
 const toggleChat = () => {
-    $('.main__left').toggleClass('fill-space');
-    $('.main__right').toggleClass('hide');
+    $('.conference__left').toggleClass('fill-space');
+    $('.conference__right').toggleClass('hide');
 }
 
 const muteUnmute = () => {
@@ -94,7 +94,7 @@ const muteUnmute = () => {
 }
 
 const playStop = () => {
-    let enabled = myVideoStream.getVideoTracks()[0].enabled;
+    const enabled = myVideoStream.getVideoTracks()[0].enabled;
     if (enabled) {
         myVideoStream.getVideoTracks()[0].enabled = false;
         setPlayVideo();
@@ -105,25 +105,21 @@ const playStop = () => {
 }
 
 const setMuteButton = () => {
-    const html = `<i class="fas fa-microphone"></i>`;
-    document.querySelector('.main__mute_button').innerHTML = html;
+    $('.conference__mute_button').html('<i class="fas fa-microphone"></i>');
 }
 
 const setUnmuteButton = () => {
-    const html = `<i class="unmute fas fa-microphone-slash"></i>`;
-    document.querySelector('.main__mute_button').innerHTML = html;
+    $('.conference__mute_button').html('<i class="unmute fas fa-microphone-slash"></i>');
 }
 
 const setStopVideo = () => {
-    const html = `<i class="fas fa-video"></i>`;
-    document.querySelector('.main__video_button').innerHTML = html;
+    $('.conference__video_button').html('<i class="fas fa-video"></i>');
 }
 
 const setPlayVideo = () => {
-    const html = `<i class="stop fas fa-video-slash"></i>`
-    document.querySelector('.main__video_button').innerHTML = html;
+    $('.conference__video_button').html('<i class="stop fas fa-video-slash"></i>');
 }
 
-$('.main__chat_button').on('click', toggleChat);
-$('.main__mute_button').on('click', muteUnmute);
-$('.main__video_button').on('click', playStop);
+$('.conference__chat_button').on('click', toggleChat);
+$('.conference__mute_button').on('click', muteUnmute);
+$('.conference__video_button').on('click', playStop);
