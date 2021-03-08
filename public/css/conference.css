@@ -170,6 +170,7 @@
     border-radius: 6px;
     position: relative;
     overflow: hidden;
+    min-height: 200px;
     background-color: #D3D3D3;
 }
 
