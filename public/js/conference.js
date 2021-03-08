@@ -1,46 +1,81 @@
-const socket = io('/')
-const videoGrid = document.getElementById('video-grid')
+const KEY_ENTER = 13;
+const ONE_MONTH = 30 * 24 * 60 * 60;
+
+navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+
+const socket = io('/');
+const videoGrid = $('#video-grid');
 const myPeer = new Peer(undefined, {
     path: '/peerjs',
     host: '/',
     port: '3000'
-})
-let myVideoStream;
-const myVideo = document.createElement('video');
-myVideo.muted = true;
+});
+let localMediaStream;
+let userMedia;
+const defaultConfig = {
+    audio: false,
+    video: false,
+};
 const peers = {};
 
-navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: true
-}).then(stream => {
-    myVideoStream = stream;
-    addVideoStream(myVideo, stream);
-    myPeer.on('call', call => {
-        call.answer(stream);
-        const video = document.createElement('video');
-        call.on('stream', userVideoStream => {
-            addVideoStream(video, userVideoStream);
-        });
-    });
+const startListening = () => {
+    navigator.mediaDevices.enumerateDevices()
+        .then(devices => {
+            devices.forEach(device => {
+                if (device.kind === 'audioinput') {
+                    defaultConfig.audio = true;
+                } else if (device.kind === 'videoinput') {
+                    defaultConfig.video = true;
+                }
+            });
+            navigator.getUserMedia(defaultConfig,
+                stream => {
+                    if (defaultConfig.audio) $('.conference__mute_button').removeClass('disabled');
+                    if (defaultConfig.video) $('.conference__video_button').removeClass('disabled');
+                    localMediaStream = stream;
+                    userMedia = document.createElement(defaultConfig.video ? 'video' : 'audio');
+                    userMedia.muted = true;
+                    addVideoStream(userMedia, localMediaStream);
+                    myPeer.on('call', call => {
+                        call.answer(stream);
+                        const localMedia = document.createElement(defaultConfig.video ? 'video' : 'audio');
+                        call.on('stream', userVideoStream => {
+                            addVideoStream(localMedia, userVideoStream);
+                        });
+                    });
 
-    socket.on('user-connected', userId => {
-        connectToNewUser(userId, stream);
-    });
-    // input value
-    let text = $("input");
-    // when press enter send message
-    $('html').keydown(function (e) {
-        if (e.which == 13 && text.val().length !== 0) {
-            socket.emit('message', text.val());
-            text.val('');
-        }
-    });
-    socket.on("createMessage", message => {
-        $('ul').append(`<li class="messages__container"><span>User</span><p>${message}</p></li>`);
-        scrollToBottom();
-    });
-});
+                    socket.on('user-connected', userId => {
+                        connectToNewUser(userId, stream);
+                    });
+                    // input value
+                    let text = $('.chat_message');
+                    // when press enter send message
+                    $('html').keydown(function (e) {
+                        if (e.which == KEY_ENTER && text.val().length !== 0) {
+                            socket.emit('message', {
+                                userName: Cookie.get('userName'),
+                                message: text.val()
+                            });
+                            text.val('');
+                        }
+                    });
+                },
+                () => {
+                    console.error('Access denied for audio/video');
+                    alert('Необходимо предоставить доступ к камере или микрофону');
+                });
+        })
+        .catch(error => {
+            console.error(`Error: ${erorr.message}`);
+        });
+}
+
+if (!Cookie.get('userName')) {
+    $('.overlay').addClass('show');
+    $('.modal').addClass('show');
+} else {
+    startListening();
+}
 
 socket.on('user-disconnected', userId => {
     if (peers[userId]) peers[userId].close();
@@ -50,7 +85,12 @@ myPeer.on('open', id => {
     socket.emit('join-room', ROOM_ID, id);
 });
 
-function connectToNewUser(userId, stream) {
+socket.on('createMessage', ({ userName, message }) => {
+    $('ul').append(`<li class="messages__container"><span>${userName}</span><p>${message}</p></li>`);
+    scrollToBottom();
+});
+
+const connectToNewUser = (userId, stream) => {
     const call = myPeer.call(userId, stream);
     const video = document.createElement('video');
     call.on('stream', userVideoStream => {
@@ -63,12 +103,12 @@ function connectToNewUser(userId, stream) {
     peers[userId] = call;
 }
 
-function addVideoStream(video, stream) {
-    video.srcObject = stream;
-    video.addEventListener('loadedmetadata', () => {
-        video.play();
-    })
-    videoGrid.append(video);
+const addVideoStream = (localMedia, stream) => {
+    localMedia.srcObject = stream;
+    localMedia.addEventListener('loadedmetadata', () => {
+        localMedia.play();
+    });
+    videoGrid.append(localMedia);
 }
 
 
@@ -83,24 +123,38 @@ const toggleChat = () => {
 }
 
 const muteUnmute = () => {
-    const enabled = myVideoStream.getAudioTracks()[0].enabled;
+    if (!defaultConfig.audio) return;
+    const enabled = localMediaStream.getAudioTracks()[0].enabled;
     if (enabled) {
-        myVideoStream.getAudioTracks()[0].enabled = false;
+        localMediaStream.getAudioTracks()[0].enabled = false;
         setUnmuteButton();
     } else {
         setMuteButton();
-        myVideoStream.getAudioTracks()[0].enabled = true;
+        localMediaStream.getAudioTracks()[0].enabled = true;
     }
 }
 
 const playStop = () => {
-    const enabled = myVideoStream.getVideoTracks()[0].enabled;
+    if (!defaultConfig.video) return;
+    const enabled = localMediaStream.getVideoTracks()[0].enabled;
     if (enabled) {
-        myVideoStream.getVideoTracks()[0].enabled = false;
+        localMediaStream.getVideoTracks()[0].enabled = false;
         setPlayVideo();
     } else {
         setStopVideo();
-        myVideoStream.getVideoTracks()[0].enabled = true;
+        localMediaStream.getVideoTracks()[0].enabled = true;
+    }
+}
+
+const saveUserName = () => {
+    const userName = $('.modal__body_input').val().trim();
+    if (userName.length > 0) {
+        Cookie.set('userName', userName, ONE_MONTH);
+        $('.overlay').removeClass('show');
+        $('.modal').removeClass('show');
+        startListening();
+    } else {
+        $('.modal__body_input').addClass('invalid');
     }
 }
 
@@ -123,3 +177,4 @@ const setPlayVideo = () => {
 $('.conference__chat_button').on('click', toggleChat);
 $('.conference__mute_button').on('click', muteUnmute);
 $('.conference__video_button').on('click', playStop);
+$('.modal__footer_button').on('click', saveUserName);

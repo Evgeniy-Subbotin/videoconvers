@@ -28,9 +28,9 @@ io.on('connection', socket => {
         socket.join(roomId);
         socket.to(roomId).broadcast.emit('user-connected', userId);
         // messages
-        socket.on('message', (message) => {
+        socket.on('message', (data) => {
             // send message to the same room
-            io.to(roomId).emit('createMessage', message);
+            io.to(roomId).emit('createMessage', data);
         });
 
         socket.on('disconnect', () => {

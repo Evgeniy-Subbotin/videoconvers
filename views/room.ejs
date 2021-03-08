@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/conference.css">
     <script src="https://kit.fontawesome.com/c939d0e917.js"></script>
+    <script src="js/libs/cookie.js" defer></script>
     <script src="js/conference.js" defer></script>
 </head>
 
@@ -32,10 +33,10 @@
                 <div class="conference__controls__button conference__settings_button">
                     <i class="fas fa-cog"></i>
                 </div>
-                <div class="conference__controls__button conference__mute_button">
+                <div class="conference__controls__button conference__mute_button disabled">
                     <i class="fas fa-microphone"></i>
                 </div>
-                <div class="conference__controls__button conference__video_button">
+                <div class="conference__controls__button conference__video_button disabled">
                     <i class="fas fa-video"></i>
                 </div>
                 <div class="conference__controls__button conference__share_button">
@@ -57,9 +58,21 @@
                 <ul class="messages"></ul>
             </div>
             <div class="conference__message_container">
-                <input id="chat_message" type="text" placeholder="Введите здесь сообщение...">
+                <input class="chat_message" type="text" placeholder="Введите здесь сообщение...">
             </div>
         </div>
+        <div class="modal">
+            <div class="modal__header">
+                <p>Введите ваше имя</p>
+            </div>
+            <div class="modal__body">
+                <input class="modal__body_input" placeholder="Введите ваше имя">
+            </div>
+            <div class="modal__footer">
+                <button class="modal__footer_button">Сохранить</button>
+            </div>
+        </div>   
+        <div class="overlay"></div> 
     </div>
 </body>
 
