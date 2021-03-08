@@ -33,12 +33,12 @@ const startListening = () => {
                     if (defaultConfig.audio) $('.conference__mute_button').removeClass('disabled');
                     if (defaultConfig.video) $('.conference__video_button').removeClass('disabled');
                     localMediaStream = stream;
-                    userMedia = document.createElement(defaultConfig.video ? 'video' : 'audio');
-                    userMedia.muted = true;
+                    userMedia = renderMediaPlayer();
+                    userMedia[0].children[0].muted = true;
                     addVideoStream(userMedia, localMediaStream);
                     myPeer.on('call', call => {
                         call.answer(stream);
-                        const localMedia = document.createElement(defaultConfig.video ? 'video' : 'audio');
+                        const localMedia = renderMediaPlayer();
                         call.on('stream', userVideoStream => {
                             addVideoStream(localMedia, userVideoStream);
                         });
@@ -92,21 +92,22 @@ socket.on('createMessage', ({ userName, message }) => {
 
 const connectToNewUser = (userId, stream) => {
     const call = myPeer.call(userId, stream);
-    const video = document.createElement('video');
+    const localMedia = renderMediaPlayer();
     call.on('stream', userVideoStream => {
-        addVideoStream(video, userVideoStream);
+        addVideoStream(localMedia, userVideoStream);
     })
     call.on('close', () => {
-        video.remove();
+        localMedia.remove();
     })
 
     peers[userId] = call;
 }
 
 const addVideoStream = (localMedia, stream) => {
-    localMedia.srcObject = stream;
-    localMedia.addEventListener('loadedmetadata', () => {
-        localMedia.play();
+    const media = localMedia[0].children[0];
+    media.srcObject = stream;
+    media.addEventListener('loadedmetadata', () => {
+        media.play();
     });
     videoGrid.append(localMedia);
 }
@@ -140,9 +141,12 @@ const playStop = () => {
     if (enabled) {
         localMediaStream.getVideoTracks()[0].enabled = false;
         setPlayVideo();
+        userMedia.find('video').addClass('hide');
     } else {
         setStopVideo();
+        userMedia.find('video').removeClass('hide');
         localMediaStream.getVideoTracks()[0].enabled = true;
+
     }
 }
 
@@ -156,6 +160,12 @@ const saveUserName = () => {
     } else {
         $('.modal__body_input').addClass('invalid');
     }
+}
+
+const renderMediaPlayer = () => {
+    return $(`<div class="media__container"></div>`)
+        .append(`<${defaultConfig.video ? 'video' : 'audio'}/>`)
+        .append(`<p class="media__container_title">${Cookie.get('userName')}</p>`);
 }
 
 const setMuteButton = () => {
