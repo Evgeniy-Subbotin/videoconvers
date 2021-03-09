@@ -81,11 +81,8 @@
     text-align: center;
 }
 
-.conference__header h6 {
+.conference__header p {
     color: #6E6D7A;
-    font-family: Roboto;
-    font-style: normal;
-    font-weight: normal;
     font-size: 30px;
     line-height: 35px;
 }
@@ -105,9 +102,6 @@
 }
 
 .messages__container span {
-    font-family: Roboto;
-    font-style: normal;
-    font-weight: normal;
     font-size: 14px;
     line-height: 16px;
     color: #000;
@@ -116,9 +110,6 @@
 }
 
 .messages__container p {
-    font-family: Roboto;
-    font-style: normal;
-    font-weight: normal;
     font-size: 14px;
     line-height: 16px;
     color: #6E6D7A;
@@ -143,9 +134,6 @@
     border: 2px solid #D3D3D3;
     box-sizing: border-box;
     border-radius: 8px;
-    font-family: Roboto;
-    font-style: normal;
-    font-weight: normal;
     font-size: 20px;
     line-height: 23px;
     color: #4a4a4a;

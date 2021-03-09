@@ -168,6 +168,10 @@ const renderMediaPlayer = () => {
         .append(`<p class="media__container_title">${Cookie.get('userName')}</p>`);
 }
 
+const leaveConference = () => {
+    document.location.href = 'https://videoconvers.herokuapp.com';
+}
+
 const setMuteButton = () => {
     $('.conference__mute_button').html('<i class="fas fa-microphone"></i>');
 }
@@ -184,6 +188,7 @@ const setPlayVideo = () => {
     $('.conference__video_button').html('<i class="stop fas fa-video-slash"></i>');
 }
 
+$('.conference__leave_button').on('click', leaveConference);
 $('.conference__chat_button').on('click', toggleChat);
 $('.conference__mute_button').on('click', muteUnmute);
 $('.conference__video_button').on('click', playStop);

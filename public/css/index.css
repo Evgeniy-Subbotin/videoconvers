@@ -10,18 +10,6 @@ html {
 }
 
 @font-face {
-    font-family: PTSans;
-    src: url('../fonts/PTS55F.woff');
-}
-
-@font-face {
-    font-family: 'Roboto';
-    src: url('../fonts/Roboto-Light.ttf') format('truetype');
-    font-weight: 300;
-    font-style: normal;
-}
-
-@font-face {
     font-family: 'Roboto';
     src: url('../fonts/Roboto-Regular.ttf') format('truetype');
     font-weight: 400;
@@ -33,13 +21,6 @@ html {
     src: url('../fonts/Roboto-Medium.ttf') format('truetype');
     font-style: normal;
     font-weight: 500;
-}
-
-@font-face {
-    font-family: 'Roboto';
-    src: url('../fonts/Roboto-Bold.ttf') format('truetype');
-    font-weight: 700;
-    font-style: normal;
 }
 
 body {
