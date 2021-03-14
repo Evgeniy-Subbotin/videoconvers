@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/main.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="js/libs/cookie.js" defer></script>
+    <script src="js/main.js" defer></script>
     <script src="https://kit.fontawesome.com/c939d0e917.js"></script>
     <title>Главная</title>
 </head>
@@ -30,7 +35,7 @@
                     <div class="content__action-conferencia"></div>
                     <p>Новая конференция</p>
                 </div>
-                <div class="content__action-demonstration">
+                <div class="content__action-demonstration join-room">
                     <div class="content__action-enter"></div>
                     <p>Войти</p>
                 </div>
@@ -63,6 +68,20 @@
             </div>
         </div>
     </footer>
+    <div class="modal hide">
+        <div class="modal__header">
+            <p>Подключиться к конференции</p>
+        </div>
+        <div class="modal__body">
+            <input class="modal__body_input room-id-input" placeholder="Укажите идентификатор конференции" />
+            <input class="modal__body_input username-input" placeholder="Введите ваше имя" />
+        </div>
+        <div class="modal__footer">
+            <button class="modal__footer_button btn-secondary close-button">Отмена</button>
+            <button class="modal__footer_button btn-primary join-button">Войти</button>
+        </div>
+    </div>   
+    <div class="overlay hide"></div> 
 </body>
 
 </html>

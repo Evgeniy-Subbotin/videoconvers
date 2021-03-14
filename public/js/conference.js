@@ -42,7 +42,7 @@ const startListening = () => {
                 }
             });
             navigator.getUserMedia(defaultConfig,
-                stream => {
+                (stream) => {
                     if (defaultConfig.audio) $('.conference__mute_button').removeClass('disabled');
                     if (defaultConfig.video) $('.conference__video_button').removeClass('disabled');
                     localMediaStream = stream;
@@ -73,7 +73,7 @@ const startListening = () => {
                         }
                     });
                 },
-                () => {
+                (error) => {
                     console.error('Access denied for audio/video');
                     alert('Необходимо предоставить доступ к камере или микрофону');
                 });
@@ -84,8 +84,8 @@ const startListening = () => {
 }
 
 if (!Cookie.get('userName')) {
-    $('.overlay').addClass('show');
-    $('.modal').addClass('show');
+    $('.overlay').removeClass('hide');
+    $('.modal').removeClass('hide');
 } else {
     startListening();
 }
@@ -153,8 +153,8 @@ const saveUserName = () => {
     const userName = $('.modal__body_input').val().trim();
     if (userName.length > 0) {
         Cookie.set('userName', userName, ONE_MONTH);
-        $('.overlay').removeClass('show');
-        $('.modal').removeClass('show');
+        $('.overlay').addClass('hide');
+        $('.modal').addClass('hide');
         startListening();
     } else {
         $('.modal__body_input').addClass('invalid');
@@ -163,7 +163,7 @@ const saveUserName = () => {
 
 const renderMediaPlayer = (userName) => {
     return $(`<div class="media__container"></div>`)
-        .append('<video/>')
+        .append('<video></video>')
         .append(`<p class="media__container_title">${userName}</p>`);
 }
 
