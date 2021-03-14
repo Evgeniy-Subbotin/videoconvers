@@ -18,6 +18,19 @@ const defaultConfig = {
 };
 const peers = {};
 
+socket.on('user-disconnected', userId => {
+    if (peers[userId]) peers[userId].close();
+});
+
+myPeer.on('open', id => {
+    socket.emit('join-room', ROOM_ID, id, Cookie.get('userName'));
+});
+
+socket.on('createMessage', ({ userName, message }) => {
+    $('ul').append(`<li class="messages__container"><span>${userName}</span><p>${message}</p></li>`);
+    scrollToBottom();
+});
+
 const startListening = () => {
     navigator.mediaDevices.enumerateDevices()
         .then(devices => {
@@ -33,19 +46,19 @@ const startListening = () => {
                     if (defaultConfig.audio) $('.conference__mute_button').removeClass('disabled');
                     if (defaultConfig.video) $('.conference__video_button').removeClass('disabled');
                     localMediaStream = stream;
-                    userMedia = renderMediaPlayer();
+                    userMedia = renderMediaPlayer(Cookie.get('userName'));
                     userMedia[0].children[0].muted = true;
                     addVideoStream(userMedia, localMediaStream);
                     myPeer.on('call', call => {
                         call.answer(stream);
-                        const localMedia = renderMediaPlayer();
                         call.on('stream', userVideoStream => {
+                            const localMedia = renderMediaPlayer(Cookie.get('userName'));
                             addVideoStream(localMedia, userVideoStream);
                         });
                     });
 
-                    socket.on('user-connected', userId => {
-                        connectToNewUser(userId, stream);
+                    socket.on('user-connected', (userId, userName) => {
+                        connectToNewUser(userId, userName, stream);
                     });
                     // input value
                     let text = $('.chat_message');
@@ -77,28 +90,15 @@ if (!Cookie.get('userName')) {
     startListening();
 }
 
-socket.on('user-disconnected', userId => {
-    if (peers[userId]) peers[userId].close();
-});
-
-myPeer.on('open', id => {
-    socket.emit('join-room', ROOM_ID, id);
-});
-
-socket.on('createMessage', ({ userName, message }) => {
-    $('ul').append(`<li class="messages__container"><span>${userName}</span><p>${message}</p></li>`);
-    scrollToBottom();
-});
-
-const connectToNewUser = (userId, stream) => {
+const connectToNewUser = (userId, userName, stream) => {
     const call = myPeer.call(userId, stream);
-    const localMedia = renderMediaPlayer();
+    const localMedia = renderMediaPlayer(userName);
     call.on('stream', userVideoStream => {
         addVideoStream(localMedia, userVideoStream);
-    })
+    });
     call.on('close', () => {
         localMedia.remove();
-    })
+    });
 
     peers[userId] = call;
 }
@@ -111,7 +111,6 @@ const addVideoStream = (localMedia, stream) => {
     });
     videoGrid.append(localMedia);
 }
-
 
 const scrollToBottom = () => {
     var d = $('.conference__chat_window');
@@ -162,10 +161,10 @@ const saveUserName = () => {
     }
 }
 
-const renderMediaPlayer = () => {
+const renderMediaPlayer = (userName) => {
     return $(`<div class="media__container"></div>`)
-        .append(`<${defaultConfig.video ? 'video' : 'audio'}/>`)
-        .append(`<p class="media__container_title">${Cookie.get('userName')}</p>`);
+        .append('<video/>')
+        .append(`<p class="media__container_title">${userName}</p>`);
 }
 
 const leaveConference = () => {

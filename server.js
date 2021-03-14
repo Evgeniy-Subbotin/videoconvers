@@ -16,16 +16,16 @@ app.use(express.static('public'));
 
 app.get('/', (req, res) => {
     res.render('main');
-})
+});
 
 app.get('/:room', (req, res) => {
     res.render('room', { roomId: req.params.room });
-})
+});
 
 io.on('connection', socket => {
-    socket.on('join-room', (roomId, userId) => {
+    socket.on('join-room', (roomId, userId, userName) => {
         socket.join(roomId);
-        socket.to(roomId).broadcast.emit('user-connected', userId);
+        socket.to(roomId).broadcast.emit('user-connected', userId, userName);
         // messages
         socket.on('message', (data) => {
             // send message to the same room

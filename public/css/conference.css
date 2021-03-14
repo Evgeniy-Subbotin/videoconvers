@@ -153,12 +153,12 @@
 }
 
 .media__container {
-    width: calc(25% - 16px);
+    width: 340px;
+    height: 200px;
     margin: 16px;
     border-radius: 6px;
     position: relative;
     overflow: hidden;
-    min-height: 200px;
     background-color: #D3D3D3;
 }
 
