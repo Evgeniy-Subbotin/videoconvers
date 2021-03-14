@@ -22,6 +22,10 @@ app.get('/:room', (req, res) => {
     res.render('room', { roomId: req.params.room });
 });
 
+app.use((req, res) => {
+    res.render('404');
+});
+
 io.on('connection', socket => {
     socket.on('join-room', (roomId, userId, userName) => {
         socket.join(roomId);
@@ -38,4 +42,4 @@ io.on('connection', socket => {
     });
 });
 
-server.listen(process.env.PORT || 443);
+server.listen(process.env.PORT || 3000);
