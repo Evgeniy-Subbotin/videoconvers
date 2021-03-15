@@ -39,6 +39,14 @@ io.on('connection', socket => {
         socket.on('disconnect', () => {
             socket.to(roomId).broadcast.emit('user-disconnected', userId);
         });
+
+        socket.on('stop-user-video', (userId) => {
+            io.to(roomId).emit('user-disabled-video', userId);
+        });
+
+        socket.on('start-user-video', (userId) => {
+            io.to(roomId).emit('user-included-video', userId);
+        });
     });
 });
 

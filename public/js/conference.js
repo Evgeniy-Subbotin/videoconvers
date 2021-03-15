@@ -18,19 +18,6 @@ const defaultConfig = {
 };
 const peers = {};
 
-socket.on('user-disconnected', userId => {
-    if (peers[userId]) peers[userId].close();
-});
-
-myPeer.on('open', id => {
-    socket.emit('join-room', ROOM_ID, id, Cookie.get('userName'));
-});
-
-socket.on('createMessage', ({ userName, message }) => {
-    $('ul').append(`<li class="messages__container"><span>${userName}</span><p>${message}</p></li>`);
-    scrollToBottom();
-});
-
 const startListening = () => {
     navigator.mediaDevices.enumerateDevices()
         .then(devices => {
@@ -46,13 +33,13 @@ const startListening = () => {
                     if (defaultConfig.audio) $('.conference__mute_button').removeClass('disabled');
                     if (defaultConfig.video) $('.conference__video_button').removeClass('disabled');
                     localMediaStream = stream;
-                    userMedia = renderMediaPlayer(Cookie.get('userName'));
+                    userMedia = renderMediaPlayer(Cookie.get('userName'), myPeer.id);
                     userMedia[0].children[0].muted = true;
                     addVideoStream(userMedia, localMediaStream);
                     myPeer.on('call', call => {
                         call.answer(stream);
-                        call.on('stream', userVideoStream => {
-                            const localMedia = renderMediaPlayer(Cookie.get('userName'));
+                        call.on('stream', (userVideoStream) => {
+                            const localMedia = renderMediaPlayer(Cookie.get('userName'), call.peer);
                             addVideoStream(localMedia, userVideoStream);
                         });
                     });
@@ -92,7 +79,7 @@ if (!Cookie.get('userName')) {
 
 const connectToNewUser = (userId, userName, stream) => {
     const call = myPeer.call(userId, stream);
-    const localMedia = renderMediaPlayer(userName);
+    const localMedia = renderMediaPlayer(userName, userId);
     call.on('stream', userVideoStream => {
         addVideoStream(localMedia, userVideoStream);
     });
@@ -104,12 +91,26 @@ const connectToNewUser = (userId, userName, stream) => {
 }
 
 const addVideoStream = (localMedia, stream) => {
-    const media = localMedia[0].children[0];
-    media.srcObject = stream;
-    media.addEventListener('loadedmetadata', () => {
-        media.play();
+    if (!videoGrid.find(`[data-user-id=${localMedia.data('user-id')}]`)[0]) {
+        const media = localMedia[0].children[0];
+        media.srcObject = stream;
+        media.addEventListener('loadedmetadata', () => {
+            media.play();
+        });
+        videoGrid.append(localMedia);
+    }
+}
+
+const hideVideoByUserId = (userId) => {
+    videoGrid.find(`[data-user-id=${userId}]`).each((index, item) => {
+        $(item).find('video').addClass('hide');
     });
-    videoGrid.append(localMedia);
+}
+
+const showVideoByUserId = (userId) => {
+    videoGrid.find(`[data-user-id=${userId}]`).each((index, item) => {
+        $(item).find('video').removeClass('hide');
+    });
 }
 
 const scrollToBottom = () => {
@@ -138,10 +139,12 @@ const playStop = () => {
     if (!defaultConfig.video) return;
     const enabled = localMediaStream.getVideoTracks()[0].enabled;
     if (enabled) {
+        socket.emit('stop-user-video', myPeer.id);
         localMediaStream.getVideoTracks()[0].enabled = false;
         setPlayVideo();
         userMedia.find('video').addClass('hide');
     } else {
+        socket.emit('start-user-video', myPeer.id);
         setStopVideo();
         userMedia.find('video').removeClass('hide');
         localMediaStream.getVideoTracks()[0].enabled = true;
@@ -161,8 +164,8 @@ const saveUserName = () => {
     }
 }
 
-const renderMediaPlayer = (userName) => {
-    return $(`<div class="media__container"></div>`)
+const renderMediaPlayer = (userName, userId) => {
+    return $(`<div class="media__container" data-user-id="${userId}"></div>`)
         .append('<video></video>')
         .append(`<p class="media__container_title">${userName}</p>`);
 }
@@ -192,3 +195,19 @@ $('.conference__chat_button').on('click', toggleChat);
 $('.conference__mute_button').on('click', muteUnmute);
 $('.conference__video_button').on('click', playStop);
 $('.modal__footer_button').on('click', saveUserName);
+
+socket.on('user-disconnected', userId => {
+    if (peers[userId]) peers[userId].close();
+});
+
+myPeer.on('open', id => {
+    socket.emit('join-room', ROOM_ID, id, Cookie.get('userName'));
+});
+
+socket.on('createMessage', ({ userName, message }) => {
+    $('ul').append(`<li class="messages__container"><span>${userName}</span><p>${message}</p></li>`);
+    scrollToBottom();
+});
+
+socket.on('user-disabled-video', hideVideoByUserId);
+socket.on('user-included-video', showVideoByUserId);
