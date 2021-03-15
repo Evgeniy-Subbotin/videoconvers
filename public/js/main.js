@@ -1,6 +1,8 @@
 const BASE_URL = 'https://videoconvers.herokuapp.com/';
 const ONE_MONTH = 30 * 24 * 60 * 60;
 
+const reUuid = /[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/;
+
 const userNameInput = $('.username-input');
 const roomIdInput = $('.room-id-input');
 
@@ -14,10 +16,11 @@ const toggleModal = () => {
 const joinRoom = () => {
     const roomId = roomIdInput.val().trim();
     const userName = userNameInput.val().trim();
-    if (roomId.length === 0) {
-        roomIdInput.addClass('invalid');
-    } else {
+    const isUuid = reUuid.test(roomId);
+    if (isUuid) {
         roomIdInput.removeClass('invalid');
+    } else {
+        roomIdInput.addClass('invalid');
     }
     if (userName.length === 0) {
         userNameInput.addClass('invalid');
@@ -25,7 +28,7 @@ const joinRoom = () => {
         userNameInput.removeClass('invalid');
         Cookie.set('userName', userName, ONE_MONTH);
     }
-    if (roomId.length > 0 && userName.length > 0) {
+    if (isUuid && userName.length > 0) {
         window.location.href = BASE_URL + roomId;
     }
 }
