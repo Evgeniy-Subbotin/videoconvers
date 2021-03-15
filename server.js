@@ -14,12 +14,18 @@ app.use('/peerjs', peerServer);
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
+const reUuid = /[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/;
+
 app.get('/', (req, res) => {
     res.render('main');
 });
 
 app.get('/:room', (req, res) => {
-    res.render('room', { roomId: req.params.room });
+    if (reUuid.test(req.params.room)) {
+        res.render('room', { roomId: req.params.room });
+    } else {
+        res.render('404');
+    }
 });
 
 app.use((req, res) => {

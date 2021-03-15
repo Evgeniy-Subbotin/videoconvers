@@ -184,3 +184,7 @@ video {
 .conference__controls__button.disabled:hover {
     background-color: #fff;
 }
+
+.conference__right.hide {
+    display: none;
+}
