@@ -14,7 +14,7 @@ app.use('/peerjs', peerServer);
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
-const reUuid = /[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/;
+const reUuid = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
 app.get('/', (req, res) => {
     res.render('main');

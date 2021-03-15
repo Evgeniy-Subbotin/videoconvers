@@ -1,7 +1,7 @@
 const BASE_URL = 'https://videoconvers.herokuapp.com/';
 const ONE_MONTH = 30 * 24 * 60 * 60;
 
-const reUuid = /[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/;
+const reUuid = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
 const userNameInput = $('.username-input');
 const roomIdInput = $('.room-id-input');
